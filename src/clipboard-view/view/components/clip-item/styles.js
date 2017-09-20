@@ -1,9 +1,9 @@
 import styled from 'styled-components'
-import { green50, grey500, grey900 } from 'material-ui/styles/colors'
+import { lightBlue50, grey500, grey900 } from 'material-ui/styles/colors'
 
 export const Container = styled.div`
   padding: 12px;
-  background-color: ${props => props.isFocused ? green50 : 'transparent'};
+  background-color: ${props => props.isFocused ? lightBlue50 : 'transparent'};
 `
 
 export const Footer = styled.div`

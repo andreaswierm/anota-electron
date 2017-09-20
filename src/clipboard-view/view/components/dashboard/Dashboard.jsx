@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import { Map } from 'immutable'
 import { clipboard, ipcRenderer } from 'electron'
 import { NavigationBar, ClipItem } from './../'
@@ -22,11 +23,21 @@ class Dashboard extends Component {
     showFavorites: false,
   }
 
+  elementsPosition = {}
+
   componentDidMount() {
     window.addEventListener('focus', this.onWindowFocus)
     window.addEventListener('blur', this.onWindowBlur)
     window.addEventListener('keydown', this.onWindowKeyDown)
     window.addEventListener('click', this.onWindowOnClick)
+
+    this.buildElementsPosition()
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.clips !== this.props.clips) {
+      this.buildElementsPosition()
+    }
   }
 
   componentWillUnmount() {
@@ -66,7 +77,7 @@ class Dashboard extends Component {
 
       this.setState(({ clipFocusIndex }) => ({
         clipFocusIndex: clips.length === (clipFocusIndex + 1) ? clipFocusIndex : clipFocusIndex + 1
-      }))
+      }), this.scrollToFocusElement)
     }
 
     // Arrow up
@@ -75,7 +86,7 @@ class Dashboard extends Component {
 
       this.setState(({ clipFocusIndex }) => ({
         clipFocusIndex: clipFocusIndex !== 0 ? clipFocusIndex - 1 : clipFocusIndex
-      }))
+      }), this.scrollToFocusElement)
     }
 
     // Enter
@@ -119,10 +130,39 @@ class Dashboard extends Component {
       .sort((clip1, clip2) => {
         return compareDesc(new Date(clip1.createdAt), new Date(clip2.createdAt))
       })
+      .slice(0, 30)
   }
 
   onClickSetFavorite = clip => () => {
     this.props.setClipFavorite(clip.id, !clip.isFavorite)
+  }
+
+  scrollToFocusElement = () => {
+    const resultContainer = ReactDOM.findDOMNode(this.resultContainer)
+    const currentBottomLine = resultContainer.scrollTop + resultContainer.getBoundingClientRect().height
+
+    const elementPosition = this.elementsPosition[this.state.clipFocusIndex]
+
+    if (currentBottomLine < elementPosition.bottom) {
+      resultContainer.scrollTop = elementPosition.bottom - resultContainer.getBoundingClientRect().height
+    } else if (resultContainer.scrollTop > elementPosition.top) {
+      resultContainer.scrollTop = elementPosition.top
+    }
+  }
+
+  buildElementsPosition = () => {
+    const resultContainer = ReactDOM.findDOMNode(this.resultContainer)
+
+    this.elementsPosition = _.reduce(resultContainer.children, (result, child, index) => {
+      const elHeight = child.getBoundingClientRect().height
+
+      result[index] = {
+        top: result[index - 1] ? result[index - 1].bottom : 0,
+        bottom: result[index - 1] ? result[index - 1].bottom + elHeight : elHeight,
+      }
+
+      return result
+    }, {})
   }
 
   render() {
@@ -150,7 +190,7 @@ class Dashboard extends Component {
           />
         </Header>
 
-        <Content>
+        <Content ref={(ref) => this.resultContainer = ref}>
           {!clips.length && (
             <NoResults>
               No results found.
