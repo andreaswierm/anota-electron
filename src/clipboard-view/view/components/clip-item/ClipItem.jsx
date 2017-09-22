@@ -5,6 +5,8 @@ import { FavoriteButton } from './../'
 
 import {
   Container,
+  Paper,
+  Content,
   Footer,
   Header,
   Title,
@@ -18,53 +20,88 @@ class ClipItem extends PureComponent {
       isFocused,
       onFocus,
       onSelect,
-      title,
       onClickSetFavorite,
+      applicationName,
+      applicationTitle,
+      payload: {
+        text,
+      }
     } = this.props
 
     return (
       <Container
-        isFocused={isFocused}
         onClick={onFocus}
         onDoubleClick={onSelect}
+        isFocused={isFocused}
       >
-        <Header>
-          <Title isFocused={isFocused}>
-            {title}
-          </Title>
+        <Paper zDepth={isFocused ? 2 : 1}>
+          <Header>
+           <Title isFocused={isFocused}>
+             {[applicationName, applicationTitle].join(' | ')}
+           </Title>
 
-          {(isFocused || isFavorite) && (
-            <FavoriteButton
-              style={{flexShrink: 0}}
-              value={isFavorite}
-              onClick={onClickSetFavorite}
-            />
-          )}
-        </Header>
-        <Footer>
-          <div>
-            Created at {format(new Date(createdAt), 'HH:mm')}
-          </div>
+           {(isFocused || isFavorite) && (
+             <FavoriteButton
+               style={{flexShrink: 0}}
+               value={isFavorite}
+               onClick={onClickSetFavorite}
+             />
+           )}
+         </Header>
 
-          {isFocused && (
+         <Content dangerouslySetInnerHTML={{ __html: text }} />
+
+          <Footer>
             <div>
-              Enter to copy
+              Created at {format(new Date(createdAt), 'HH:mm')}
             </div>
-          )}
-        </Footer>
+
+            {isFocused && (
+              <div>
+                Enter to copy
+              </div>
+            )}
+          </Footer>
+        </Paper>
       </Container>
     )
   }
 }
 
 ClipItem.defaultProps = {
-  title: PropTypes.string.isRequired,
+  payload: PropTypes.object.isRequired,
   onSelect: PropTypes.func.isRequired,
   isFocused: PropTypes.bool,
   createdAt: PropTypes.string,
   onFocus: PropTypes.func,
   isFavorite: PropTypes.bool,
   onClickSetFavorite: PropTypes.func,
+  applicationName: PropTypes.string,
+  applicationTitle: PropTypes.string,
 }
 
 export default ClipItem
+// <Header>
+//           <Title isFocused={isFocused}>
+//             {[applicationName, applicationTitle].join(' | ')}
+//           </Title>
+
+//           {(isFocused || isFavorite) && (
+//             <FavoriteButton
+//               style={{flexShrink: 0}}
+//               value={isFavorite}
+//               onClick={onClickSetFavorite}
+//             />
+//           )}
+//         </Header>
+        // <Footer>
+        //   <div>
+        //     Created at {format(new Date(createdAt), 'HH:mm')}
+        //   </div>
+
+        //   {isFocused && (
+        //     <div>
+        //       Enter to copy
+        //     </div>
+        //   )}
+        // </Footer>

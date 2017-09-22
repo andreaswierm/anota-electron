@@ -203,7 +203,9 @@ class Dashboard extends Component {
           {!!clips.length && _.map(clips, (clip, index) => (
             <ClipItem
               key={clip.id}
-              title={clip.title}
+              payload={clip.payload}
+              applicationName={clip.application.name}
+              applicationTitle={clip.application.title}
               createdAt={clip.createdAt}
               onSelect={this.onClickClip(clip)}
               isFocused={index === clipFocusIndex}
