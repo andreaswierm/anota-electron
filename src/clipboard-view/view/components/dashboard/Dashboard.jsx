@@ -128,7 +128,7 @@ class Dashboard extends Component {
         return !!searchTerm.length ? clip.payload.text.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1 : true
       })
       .sort((clip1, clip2) => {
-        return compareDesc(new Date(clip1.createdAt), new Date(clip2.createdAt))
+        return compareDesc(new Date(clip1.updatedAt), new Date(clip2.updatedAt))
       })
       .slice(0, 30)
   }
