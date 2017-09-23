@@ -1,6 +1,6 @@
 import Menubar from './utils/menubar'
 import { enableLiveReload } from 'electron-compile'
-import Clipboard from './clipboard'
+import ClipboardListener from './clipboard-listener'
 import ClipboardView from './clipboard-view'
 import storeConfiguration from './redux/configuration'
 import * as clipboardActions from './redux/clipboard/actions'
@@ -21,7 +21,7 @@ menubar.on('ready', () => {
 
   store.dispatch(clipboardActions.fetchFromStorege())
 
-  Clipboard.init({
+  ClipboardListener.init({
     onSave: () => {
       store.dispatch(clipboardActions.fetchFromStorege())
     }
