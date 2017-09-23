@@ -12,11 +12,12 @@ const menubar = Menubar({
 })
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
+let store
 
 if (isDevMode) enableLiveReload({strategy: 'react-hmr'});
 
 menubar.on('ready', () => {
-  const store = storeConfiguration(null, 'main')
+  store = storeConfiguration(null, 'main')
 
   store.dispatch(clipboardActions.fetchFromStorege())
 
@@ -35,6 +36,10 @@ menubar.on('show', () => {
   } else {
     ClipboardView.activate()
   }
+})
+
+menubar.on('click-clear-history', () => {
+  store.dispatch(clipboardActions.clearStorege())
 })
 
 menubar.app.on('window-all-closed', () => {

@@ -77,6 +77,16 @@ module.exports = function create (opts) {
 
       const contextMenu = Menu.buildFromTemplate([
         {
+          label: 'Clear clipboard history',
+          click: () => {
+            menubar.emit('click-clear-history')
+            menubar.tray.setHighlightMode('never')
+          }
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Quit Anota                      ⌘Q',
           role: 'quit',
         },

@@ -35,10 +35,15 @@ const save = (state) => {
 }
 
 const clear = () => {
-  storage.clear((err) => {
-    if (err) {
-      throw err
-    }
+  return new Promise((resolve, reject) => {
+    storage.clear((err) => {
+      if (err) {
+        reject(err)
+        throw err
+      }
+
+      resolve()
+    })
   })
 }
 
