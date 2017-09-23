@@ -12,6 +12,8 @@ export const Header = styled.div`
   padding-left: 8px;
   background-color: ${grey50};
   border: 1px solid ${grey200};
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
 `
 
 export const TitleBar = styled.div`
