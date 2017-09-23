@@ -13,6 +13,7 @@ export const Paper = styled(MaterialPaper)`
 
 export const Content = styled.div`
   font-size: 12px;
+  font-weight: bold;
   padding: 4px;
   border-top: 1px solid ${grey100};
   border-bottom: 1px solid ${grey100};
