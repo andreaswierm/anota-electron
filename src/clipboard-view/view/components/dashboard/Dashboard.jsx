@@ -125,7 +125,7 @@ class Dashboard extends Component {
         return showFavorites ? clip.isFavorite : true
       })
       .filter(clip => {
-        return !!searchTerm.length ? clip.title.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1 : true
+        return !!searchTerm.length ? clip.payload.text.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1 : true
       })
       .sort((clip1, clip2) => {
         return compareDesc(new Date(clip1.createdAt), new Date(clip2.createdAt))
