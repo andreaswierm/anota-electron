@@ -10,6 +10,7 @@ import {
   Footer,
   Header,
   Title,
+  ApplicationImage,
 } from './styles'
 
 class ClipItem extends PureComponent {
@@ -23,6 +24,7 @@ class ClipItem extends PureComponent {
       onClickSetFavorite,
       applicationName,
       applicationTitle,
+      applicationIconPath,
       payload: {
         text,
       }
@@ -37,7 +39,13 @@ class ClipItem extends PureComponent {
         <Paper zDepth={isFocused ? 2 : 1}>
           <Header>
            <Title isFocused={isFocused}>
-             {[applicationName, applicationTitle].join(' | ')}
+            <ApplicationImage data={`file://${applicationIconPath}`} type="image/png">
+              <img src={`file://${applicationIconPath}`} />
+            </ApplicationImage>
+
+            <span>
+              {[applicationName, applicationTitle].join(' | ')}
+            </span>
            </Title>
 
            {(isFocused || isFavorite) && (
@@ -78,30 +86,7 @@ ClipItem.defaultProps = {
   onClickSetFavorite: PropTypes.func,
   applicationName: PropTypes.string,
   applicationTitle: PropTypes.string,
+  applicationIconPath: PropTypes.string,
 }
 
 export default ClipItem
-// <Header>
-//           <Title isFocused={isFocused}>
-//             {[applicationName, applicationTitle].join(' | ')}
-//           </Title>
-
-//           {(isFocused || isFavorite) && (
-//             <FavoriteButton
-//               style={{flexShrink: 0}}
-//               value={isFavorite}
-//               onClick={onClickSetFavorite}
-//             />
-//           )}
-//         </Header>
-        // <Footer>
-        //   <div>
-        //     Created at {format(new Date(createdAt), 'HH:mm')}
-        //   </div>
-
-        //   {isFocused && (
-        //     <div>
-        //       Enter to copy
-        //     </div>
-        //   )}
-        // </Footer>

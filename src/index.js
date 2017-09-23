@@ -4,6 +4,7 @@ import ClipboardListener from './clipboard-listener'
 import ClipboardView from './clipboard-view'
 import storeConfiguration from './redux/configuration'
 import * as clipboardActions from './redux/clipboard/actions'
+import rimraf from 'rimraf'
 
 const menubar = Menubar({
   alwaysOnTop: true,
@@ -40,6 +41,12 @@ menubar.on('show', () => {
 
 menubar.on('click-clear-history', () => {
   store.dispatch(clipboardActions.clearStorege())
+
+  rimraf(`${__dirname}/assets/application-icons`, (err) => {
+    if (err) {
+      throw err
+    }
+  })
 })
 
 menubar.app.on('window-all-closed', () => {

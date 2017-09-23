@@ -206,6 +206,7 @@ class Dashboard extends Component {
               payload={clip.payload}
               applicationName={clip.application.name}
               applicationTitle={clip.application.title}
+              applicationIconPath={clip.application.iconPath}
               createdAt={clip.createdAt}
               onSelect={this.onClickClip(clip)}
               isFocused={index === clipFocusIndex}

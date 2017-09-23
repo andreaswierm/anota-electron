@@ -43,4 +43,13 @@ export const Title = styled.div`
   padding-right: 6px;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+`
+
+export const ApplicationImage = styled.object`
+  height: 24px;
+  width: 24px;
+  margin-right: 4px;
+  flex-shrink: 0;
 `

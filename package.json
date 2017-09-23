@@ -57,9 +57,11 @@
     "electron-positioner": "^3.0.0",
     "extend": "^3.0.1",
     "immutable": "^3.8.1",
+    "lodash": "^4.17.4",
     "material-ui": "^0.19.1",
     "menubar": "^5.2.3",
     "mongodb": "^2.2.31",
+    "nodobjc": "^2.1.0",
     "prop-types": "^15.5.10",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
@@ -68,6 +70,7 @@
     "redux": "^3.7.2",
     "redux-electron-store": "^0.4.1",
     "redux-thunk": "^2.2.0",
+    "rimraf": "^2.6.2",
     "styled-components": "^2.1.2"
   },
   "devDependencies": {
