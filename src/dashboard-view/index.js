@@ -1,4 +1,4 @@
-import Electron, { globalShortcut, BrowserWindow, Menu, ipcMain } from 'electron'
+import { globalShortcut, BrowserWindow, Menu, ipcMain } from 'electron'
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
@@ -25,15 +25,11 @@ const createWindow = () => {
     return
   }
 
-  const { height } = Electron.screen.getPrimaryDisplay().workAreaSize
-
   win = new BrowserWindow({
     show: false,
     alwaysOnTop: true,
-    y: 30,
-    x: 10,
-    width: isDevMode ? 460 : 320,
-    height: height - 20,
+    width: 690,
+    height: isDevMode ? 600 : 400,
     titleBarStyle: 'hidden',
     maximizable: false,
     minimizable: false,
@@ -57,7 +53,7 @@ const createWindow = () => {
 const init = () => {
   createWindow()
 
-  const ret = globalShortcut.register('Command+Shift+V', () => {
+  const ret = globalShortcut.register('Command+Shift+M', () => {
     if (isVisible) {
       hideWindow()
     } else {

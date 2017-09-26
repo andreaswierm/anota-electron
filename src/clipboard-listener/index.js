@@ -37,11 +37,7 @@ const saveRecord = async (record) => {
   }
 }
 
-const buildRecord = async ({
-  text
-}) => {
-  const activeWindowInfo = await activeWin()
-
+const saveAppIcon = iconPath => {
   const bundleIdentifier =
     $.NSWorkspace
       ('sharedWorkspace')
@@ -69,13 +65,6 @@ const buildRecord = async ({
         appPath
       );
 
-  const iconPathBase = path.normalize(`${__dirname}/../assets/application-icons`)
-
-  if (!fs.existsSync(iconPathBase)){
-    fs.mkdirSync(iconPathBase);
-  }
-
-  const iconPath = `${iconPathBase}/${kebabCase(activeWindowInfo.app)}.png`
   const cgRef = icon('CGImageForProposedRect', null, 'context', null, 'hints', null)
   const newRep = $.NSBitmapImageRep('alloc')('initWithCGImage', cgRef)
   const pngData = newRep('representationUsingType', $.NSPNGFileType, 'properties', null)
@@ -86,6 +75,26 @@ const buildRecord = async ({
   savedImage = savedImage.resize({ width: 128, height: 128 })
 
   fs.writeFileSync(iconPath, savedImage.toPNG())
+
+  return didSave
+}
+
+const buildRecord = async ({
+  text
+}) => {
+  const activeWindowInfo = await activeWin()
+
+  const iconPathBase = path.normalize(`${__dirname}/../assets/application-icons`)
+  const iconPath = `${iconPathBase}/${kebabCase(activeWindowInfo.app)}.png`
+  let didSave = true
+
+  if (!fs.existsSync(iconPath)) {
+    if (!fs.existsSync(iconPathBase)){
+      fs.mkdirSync(iconPathBase);
+    }
+
+    didSave = saveAppIcon(iconPath)
+  }
 
   return {
     id: new ObjectID(),
