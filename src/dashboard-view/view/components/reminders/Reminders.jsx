@@ -6,139 +6,183 @@ import Header from './header/Header'
 import React, { Component } from 'react'
 import ReminderItem from './reminder-item/ReminderItem'
 import { connect } from 'react-redux'
-import { Container } from './styles'
+import { Container, DoneReminder } from './styles'
 import differenceInDays from 'date-fns/difference_in_days'
+import { Map, List } from 'immutable'
+import { ObjectID } from 'mongodb'
+
+import {
+  Editor,
+  EditorState,
+  convertToRaw,
+  ContentBlock,
+  ContentState,
+  convertFromRaw,
+  genKey,
+} from 'draft-js'
+
+const blockRenderMap = Map({
+  'unstyled': {
+    element: 'div',
+  }
+});
 
 class Reminders extends Component {
-  state = {
-    isEditMode: false,
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      editorState: this.generateEditorState(this.props.reminders),
+    }
   }
 
-  handleOnClickAdd = () => {
-    this.setState(({ isEditMode }) => ({ isEditMode: !isEditMode }))
+  componentDidMount() {
+    this.refs.editor.focus()
+
+    window.addEventListener('focus', this.onWindowFocus)
   }
 
-  handleCreate = value => {
-    const { createReminder } = this.props
+  componentWillUnmount() {
+    window.removeEventListener('focus', this.onWindowFocus)
 
-    if (!value.length) {
-      return
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.reminders.length !== this.props.reminders.length) {
+      this.setState({ editorState: this.generateEditorState(nextProps.reminders) })
+    }
+  }
+
+  onWindowFocus = () => {
+    this.refs.editor.focus()
+    this.handleOnBlur()
+  }
+
+  onChange = editorState => {
+    const emptyTasks = editorState
+      .getCurrentContent()
+      .get('blockMap')
+      .filter(block => !block.get('text', '').length)
+
+    if (emptyTasks.size > 1) {
+      editorState = EditorState.undo(editorState)
     }
 
-    createReminder({ value }).then(() => {
-      this.setState({ isEditMode: false })
-    })
+    this.setState({ editorState })
   }
 
-  handleOnUpdate = reminder => value => {
-    const { updateReminder } = this.props
+  handleOnBlur = () => {
+    const { saveRemindersState } = this.props
 
-    if (!value.length) {
-      return
+    const blocks = convertToRaw(this.state.editorState.getCurrentContent())
+      .blocks
+      .map(block => ({
+        id: new ObjectID().toString(),
+        content: block.text,
+        isDone: !!block.data.checked,
+        doneAt: !!block.data.checked ? (block.data.doneAt ? block.data.doneAt : new Date()) : null,
+      }))
+
+    saveRemindersState(blocks)
+  }
+
+  generateEditorState = reminders => {
+    if (!!reminders.length) {
+      return (
+        EditorState.createWithContent(convertFromRaw({
+          entityMap: {},
+          blocks: _.map(reminders, reminder => ({
+            text: reminder.content,
+            data: {
+              checked: reminder.isDone,
+              doneAt: reminder.doneAt,
+            },
+          }))
+        }))
+      )
     }
 
-    reminder.value = value
-
-    updateReminder(reminder)
+    return EditorState.createEmpty()
   }
 
-  handleOnCheck = reminder => () => {
-    const { setReminderDone } = this.props
-
-    // reminder.isDone = !reminder.isDone
-
-    setReminderDone(reminder, !reminder.doneAt)
+  getEditorState = () => {
+    return this.state.editorState
   }
 
   getHeaderTitle = date => {
     const diffInDays = differenceInDays(new Date(), date)
-    let title
 
-    if (diffInDays === 0) {
-      title = 'Today'
-    } else if (diffInDays === 1) {
-      title = 'Yesterday'
-    } else {
-      title = format(date, 'Do MMM')
+    if (diffInDays === 1) {
+      return 'Yesterday'
     }
 
-    return {
-      title,
-      diffInDays,
+    return format(date, 'Do MMM')
+  }
+
+  blockRenderer = contentBlock => {
+    const type = contentBlock.getType();
+    if (type === 'unstyled') {
+      return {
+        component: ReminderItem,
+        editable: true,
+        props: {
+          getEditorState: this.getEditorState,
+          onChange: this.onChange,
+        },
+      };
     }
   }
 
   render() {
+    const doneReminders = _.chain(this.props.doneReminders)
+      .groupBy(reminder => format(new Date(reminder.doneAt), 'YYYY-MM-DD'))
+      .toPairs()
+      .sort((group1, group2) => {
+        return compareDesc(new Date(group1[0]), new Date(group2[0]))
+      })
+      .map((group, index) => {
+        const date = group[0] !== '0' ? new Date(group[0]) : new Date()
+        const reminders = group[1]
+
+        return (
+          <div key={date}>
+            <Header title={this.getHeaderTitle(date)} />
+
+            {_.map(reminders, (reminder, index) => (
+              <DoneReminder key={index}>
+                {reminder.content}
+              </DoneReminder>
+            ))}
+          </div>
+        )
+      })
+      .value()
+
     return (
       <Container>
-        {this.props.reminders.length ? _.chain(this.props.reminders)
-          .groupBy((reminder) => {
-            const date = !!reminder.doneAt ? new Date(reminder.doneAt) : new Date()
-
-            return format(date, 'YYYY-MM-DD')
-          })
-          .toPairs()
-          .sort((group1, group2) => {
-            const date1 = group1[0] !== '0' ? new Date(group1[0]) : new Date()
-            const date2 = group2[0] !== '0' ? new Date(group2[0]) : new Date()
-
-            return compareDesc(date1, date2)
-          })
-          .map((group) => {
-            const date = group[0] !== '0' ? new Date(group[0]) : new Date()
-            const reminders = group[1]
-
-            return this.renderDay(date, reminders)
-          })
-          .value()
-        : this.renderDay(new Date(), [])
-        }
-      </Container>
-    )
-  }
-
-  renderDay = (date, reminders) => {
-    const { isEditMode } = this.state
-    const { title, diffInDays } = this.getHeaderTitle(date)
-
-    return (
-      <div key={format(date)}>
-        <Header
-          title={title}
-          showAddButton={diffInDays === 0}
-          onClickAdd={this.handleOnClickAdd}
+        <Header title="Today" />
+        <Editor
+          ref="editor"
+          editorState={this.state.editorState}
+          onChange={this.onChange}
+          blockRendererFn={this.blockRenderer}
+          blockRenderMap={blockRenderMap}
+          onBlur={this.handleOnBlur}
         />
 
-        {_.map(reminders, (reminder) => (
-          <ReminderItem
-            key={reminder.id}
-            value={reminder.value}
-            isChecked={!!reminder.doneAt}
-            onCheck={this.handleOnCheck(reminder)}
-            onChange={this.handleOnUpdate(reminder)}
-          />
-        ))}
-
-        {isEditMode && diffInDays === 0 && (
-          <ReminderItem
-            autoFocus
-            onCheck={() => null}
-            onChange={this.handleCreate}
-          />
-        )}
-      </div>
+        {doneReminders}
+      </Container>
     )
   }
 }
 
 const mapStateToProps = state => ({
   reminders: _.map(state.REMINDER.collection),
+  doneReminders: _.map(state.REMINDER.doneCollection),
 })
 
 const mapActionsToProps = dispatch => ({
-  createReminder: payload => dispatch(reminderActions.create(payload)),
-  setReminderDone: (payload, isDone) => dispatch(reminderActions.setDone(payload, isDone)),
-  updateReminder: payload => dispatch(reminderActions.update(payload)),
+  saveRemindersState: payload => dispatch(reminderActions.createState(payload)),
 })
 
 export default connect(mapStateToProps, mapActionsToProps)(Reminders)

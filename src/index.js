@@ -36,10 +36,10 @@ menubar.on('ready', () => {
 })
 
 menubar.on('show', () => {
-  if (ClipboardView.isWindowOpen()) {
-    ClipboardView.hide()
+  if (DashboardView.isWindowOpen()) {
+    DashboardView.hide()
   } else {
-    ClipboardView.activate()
+    DashboardView.activate()
   }
 })
 

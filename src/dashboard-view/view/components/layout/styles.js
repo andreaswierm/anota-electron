@@ -11,12 +11,12 @@ export const ContentContainer = styled.div`
 `
 
 export const DraggableHeader = styled.div`
-  -webkit-user-select: none;
   -webkit-app-region: drag;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  -webkit-user-select: none;
   height: 24px;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
   z-index: 100;
 `

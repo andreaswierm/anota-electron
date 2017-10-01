@@ -8,11 +8,20 @@ import {
 
 const initialState = {
   collection: {},
+  doneCollection: {},
 }
 
 const reducers = {
   [ON_FETCH_FROM_STORAGE]: (state, action) => {
-    const newCollection = _.reduce(action.payload, (result, reminderItem) => {
+    const reminders = _.reduce(action.payload.reminders, (result, reminderItem) => {
+      const reminder = reminderItem
+
+      result[reminder.id] = reminder
+
+      return result
+    }, {})
+
+    const doneReminders = _.reduce(action.payload.doneReminders, (result, reminderItem) => {
       const reminder = reminderItem
 
       result[reminder.id] = reminder
@@ -22,10 +31,14 @@ const reducers = {
 
     return {
       ...state,
+      doneCollection: {
+        ...state.doneCollection,
+        ...doneReminders,
+      },
       collection: {
         ...state.collection,
-        ...newCollection,
-      }
+        ...reminders,
+      },
     };
   },
 

@@ -5,7 +5,7 @@ export const Container = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 4px 4px 4px 28px;
+  padding: 4px 4px 4px 18px;
   margin-top: 28px;
 `
 

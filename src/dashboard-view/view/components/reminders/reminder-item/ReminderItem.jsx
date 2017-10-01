@@ -1,76 +1,52 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import { Container, Input }  from './styles'
+import { Container, CheckboxInput }  from './styles'
 import Checkbox from 'material-ui/Checkbox'
+import { EditorBlock, EditorState } from 'draft-js'
 
 class ReminderItem extends PureComponent {
-  state = {
-    value: this.props.value,
-  }
+  handleOnChangeInput = () => {
+    const { block, blockProps } = this.props;
 
-  handleOnChangeInput = event => {
-    const value = event.target.value
+    const { onChange, getEditorState } = blockProps;
+    const data = block.getData();
+    const checked = (data.has('checked') && data.get('checked') === true);
+    const newData = data.set('checked', !checked);
 
-    this.setState({ value })
-  }
+    const editorState = getEditorState()
 
-  handleOnBlurInput = () => {
-    const { value } = this.state
-    const { onChange } = this.props
+    const contentState = editorState.getCurrentContent()
+    const newBlock = block.merge({
+      data: newData,
+    })
+    const newContentState = contentState.merge({
+      blockMap: contentState.getBlockMap().set(block.getKey(), newBlock),
+    })
+    onChange(EditorState.push(editorState, newContentState, 'change-block-type'))
 
-    onChange(value)
-  }
-
-  handleInnerRef = ref => {
-    const { innerRef } = this.props
-    this.inputRef = ref
-
-    if (innerRef) {
-      innerRef(ref)
-    }
   }
 
   render() {
-    const { value } = this.state
-    const { onCheck, isChecked, autoFocus } = this.props
+    const data = this.props.block.getData()
+
+    const checked = data.get('checked') === true;
+
+    const editorBlockProps = {
+      ...this.props,
+      autoFocus: true,
+    }
 
     return (
-      <Container>
-        <Checkbox
-          onCheck={onCheck}
-          checked={isChecked}
-          style={{
-            width: '24px',
-            marginRight: '-16px',
-          }}
-        />
-        <Input
-          lineThrough={isChecked}
-          innerRef={this.handleInnerRef}
-          autoFocus={autoFocus}
-          type="text"
+      <Container lineThrough={checked}>
+        <CheckboxInput
+          type="checkbox"
+          checked={checked}
           onChange={this.handleOnChangeInput}
-          value={value}
-          onBlur={this.handleOnBlurInput}
         />
+        <EditorBlock {...editorBlockProps} />
       </Container>
     )
   }
-}
-
-ReminderItem.defaultProps = {
-  autoFocus: false,
-  value: '',
-  isChecked: false,
-}
-
-ReminderItem.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  onCheck: PropTypes.func.isRequired,
-  innerRef: PropTypes.func,
-  isChecked: PropTypes.bool,
-  autoFocus: PropTypes.bool,
-  value: PropTypes.string,
 }
 
 export default ReminderItem
